@@ -1,0 +1,30 @@
+[trello]
+api_key = ""
+api_token = ""
+board_id = ""
+source_list = "Post Queue"      # list name to pull cards from
+
+[schedule]
+post_times = ["09:00", "13:00", "18:30"]
+post_time_randomization = 600         # +/- seconds to randomize each post time
+
+[platforms.twitter]
+enabled = false
+api_key = ""
+api_secret = ""
+access_token = ""
+access_secret = ""
+bearer_token = ""
+
+[platforms.bluesky]
+enabled = false
+handle = ""
+password = ""
+
+[platforms.mastodon]
+enabled = false
+instance_url = "https://mastodon.social"
+access_token = ""
+
+[logging]
+level = "INFO"

@@ -1,0 +1,13 @@
+[Unit]
+Description=Trello Post Scheduler
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/trello-post-scheduler --config %h/.config/trello-post-scheduler/config.toml
+Restart=on-failure
+RestartSec=30
+
+[Install]
+WantedBy=default.target

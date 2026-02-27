@@ -1,0 +1,39 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "trello-post-scheduler"
+version = "0.1.0"
+description = "Post Trello cards to Twitter/X, Bluesky, and Mastodon on a schedule"
+requires-python = ">=3.11"
+license = "MIT"
+readme = "README.md"
+authors = [{ name = "Tyler Henthorn", email = "tylerhenj@gmail.com" }]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "py-trello>=0.19.0",
+    "tweepy>=4.14.0",
+    "atproto>=0.0.55",
+    "Mastodon.py>=1.8.1",
+    "APScheduler>=3.10.0",
+    "requests>=2.31.0",
+]
+
+[project.scripts]
+trello-post-scheduler = "trello_post_scheduler.cli:main"
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-mock", "ruff", "mypy"]
+
+[project.urls]
+Homepage = "https://github.com/tylerhenthorn/trello-post-scheduler"
+Source = "https://github.com/tylerhenthorn/trello-post-scheduler"
+Issues = "https://github.com/tylerhenthorn/trello-post-scheduler/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/trello_post_scheduler"]
