@@ -28,7 +28,7 @@ dependencies = [
 trello-post-scheduler = "trello_post_scheduler.cli:main"
 
 [project.optional-dependencies]
-dev = ["pytest", "pytest-mock", "ruff", "mypy"]
+dev = ["pytest", "pytest-cov", "pytest-mock", "ruff", "mypy"]
 
 [project.urls]
 Homepage = "https://github.com/tylerhenthorn/trello-post-scheduler"
