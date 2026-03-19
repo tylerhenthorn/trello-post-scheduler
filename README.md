@@ -14,9 +14,6 @@ Requires [pipx](https://pipx.pypa.io).
 
 ```
 pipx install .
-cp trello-post-scheduler.service ~/.config/systemd/user/
-systemctl --user daemon-reload
-systemctl --user enable trello-post-scheduler
 ```
 
 ## Configuration
@@ -97,6 +94,9 @@ Set `enabled = true` on platforms you want to use after filling in credentials.
 ### Running as a service
 
 ```
+cp trello-post-scheduler.service ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user enable trello-post-scheduler
 systemctl --user start trello-post-scheduler
 ```
 
