@@ -14,6 +14,11 @@ log = logging.getLogger(__name__)
 SUPPORTED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
 
 
+def _parse_newlines(text: str) -> str:
+    r"""Replace literal \n sequences in text with actual newline characters."""
+    return text.replace("\\n", "\n")
+
+
 @dataclass
 class CardPost:
     text: str
@@ -68,7 +73,7 @@ class TrelloClient:
             resp.raise_for_status()
             alt = (card.description or "").strip() or None
             return CardPost(
-                text=card.name,
+                text=_parse_newlines(card.name),
                 image_bytes=resp.content,
                 image_mime=image_att.mime_type,
                 alt_text=alt,
@@ -76,7 +81,7 @@ class TrelloClient:
 
         # No image — existing behavior
         desc = (card.description or "").strip()
-        return CardPost(text=desc if desc else card.name)
+        return CardPost(text=desc if desc else _parse_newlines(card.name))
 
     def delete_card(self, card) -> None:
         """Delete a card after successful posting."""
