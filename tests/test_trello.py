@@ -151,6 +151,51 @@ def test_card_to_post_with_image(mock_client_cls, mock_get, trello_cfg):
 
 @patch("trello_post_scheduler.trello.requests.get")
 @patch("trello_post_scheduler.trello._TrelloClient")
+def test_card_to_post_parses_newlines_in_title(mock_client_cls, mock_get, trello_cfg):
+    board = MagicMock()
+    board.list_lists.return_value = [_make_list("Ready")]
+    mock_client_cls.return_value.get_board.return_value = board
+
+    client = TrelloClient(trello_cfg)
+    card = _make_card(name=r"Line one\nLine two\nLine three", description="")
+    result = client.card_to_post(card)
+
+    assert result.text == "Line one\nLine two\nLine three"
+    assert result.image_bytes is None
+
+
+@patch("trello_post_scheduler.trello.requests.get")
+@patch("trello_post_scheduler.trello._TrelloClient")
+def test_card_to_post_parses_newlines_in_title_with_image(
+    mock_client_cls, mock_get, trello_cfg,
+):
+    board = MagicMock()
+    board.list_lists.return_value = [_make_list("Ready")]
+    mock_client_cls.return_value.get_board.return_value = board
+
+    mock_resp = MagicMock()
+    mock_resp.content = b"imgdata"
+    mock_get.return_value = mock_resp
+
+    attachment = SimpleNamespace(
+        url="https://trello.com/1/cards/abc/attachments/def/download/img.jpg",
+        mime_type="image/jpeg",
+        is_upload=True,
+        name="img.jpg",
+    )
+    card = _make_card(
+        name=r"Hello\nWorld", description="Alt text", attachments=[attachment],
+    )
+
+    client = TrelloClient(trello_cfg)
+    result = client.card_to_post(card)
+
+    assert result.text == "Hello\nWorld"
+    assert result.image_bytes == b"imgdata"
+
+
+@patch("trello_post_scheduler.trello.requests.get")
+@patch("trello_post_scheduler.trello._TrelloClient")
 def test_card_to_post_skips_non_image(mock_client_cls, mock_get, trello_cfg):
     board = MagicMock()
     board.list_lists.return_value = [_make_list("Ready")]
