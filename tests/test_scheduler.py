@@ -1,7 +1,8 @@
 from unittest.mock import MagicMock, patch
 
+from trello_post_scheduler.config import AppConfig, TrelloConfig, ScheduleConfig, PlatformsConfig, LoggingConfig
 from trello_post_scheduler.poster import PostResult
-from trello_post_scheduler.scheduler import post_job
+from trello_post_scheduler.scheduler import build_scheduler, post_job
 from trello_post_scheduler.trello import CardPost
 
 
@@ -71,3 +72,31 @@ def test_no_cards_is_noop():
 
     trello.card_to_post.assert_not_called()
     trello.delete_card.assert_not_called()
+
+
+@patch("trello_post_scheduler.scheduler.TrelloClient")
+def test_build_scheduler_sets_jitter_on_trigger(mock_trello_cls):
+    cfg = AppConfig(
+        trello=TrelloConfig(api_key="k", api_token="t", board_id="b"),
+        schedule=ScheduleConfig(post_times=["12:00"], post_time_randomization=300),
+        platforms=PlatformsConfig(),
+        logging=LoggingConfig(),
+    )
+    scheduler = build_scheduler(cfg, [])
+    jobs = scheduler.get_jobs()
+    assert len(jobs) == 1
+    assert jobs[0].trigger.jitter == 600
+
+
+@patch("trello_post_scheduler.scheduler.TrelloClient")
+def test_build_scheduler_no_jitter_when_zero(mock_trello_cls):
+    cfg = AppConfig(
+        trello=TrelloConfig(api_key="k", api_token="t", board_id="b"),
+        schedule=ScheduleConfig(post_times=["12:00"], post_time_randomization=0),
+        platforms=PlatformsConfig(),
+        logging=LoggingConfig(),
+    )
+    scheduler = build_scheduler(cfg, [])
+    jobs = scheduler.get_jobs()
+    assert len(jobs) == 1
+    assert jobs[0].trigger.jitter is None

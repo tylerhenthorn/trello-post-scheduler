@@ -53,20 +53,20 @@ def build_scheduler(cfg: AppConfig, posters: list) -> BlockingScheduler:
         base = datetime(2000, 1, 1, int(hour), int(minute))
         shifted = base - timedelta(seconds=r)
 
-        job_kwargs = dict(
+        trigger_kwargs = dict(
+            hour=shifted.hour, minute=shifted.minute, second=shifted.second,
+        )
+        if r > 0:
+            trigger_kwargs["jitter"] = r * 2
+
+        scheduler.add_job(
             func=post_job,
-            trigger=CronTrigger(
-                hour=shifted.hour, minute=shifted.minute, second=shifted.second,
-            ),
+            trigger=CronTrigger(**trigger_kwargs),
             args=[trello, posters],
             id=f"post_{time_str}",
             max_instances=1,
             coalesce=True,
         )
-        if r > 0:
-            job_kwargs["jitter"] = r * 2
-
-        scheduler.add_job(**job_kwargs)
         log.info("scheduled post job at %s (randomization ±%ds)", time_str, r)
 
     return scheduler
