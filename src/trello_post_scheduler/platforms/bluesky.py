@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import io
 import logging
 
-from atproto import Client
+from PIL import Image
+from atproto import Client, models
 
 from trello_post_scheduler.config import BlueskyConfig
 from trello_post_scheduler.poster import PostResult
@@ -24,11 +26,22 @@ class BlueskyPoster:
         trimmed = post.text[:MAX_CHARS]
         try:
             if post.image_bytes is not None:
-                resp = self.client.send_image(
-                    text=trimmed,
-                    image=post.image_bytes,
-                    image_alt=post.alt_text or "",
+                img = Image.open(io.BytesIO(post.image_bytes))
+                width, height = img.size
+                upload = self.client.upload_blob(post.image_bytes)
+                embed = models.AppBskyEmbedImages.Main(
+                    images=[
+                        models.AppBskyEmbedImages.Image(
+                            alt=post.alt_text or "",
+                            image=upload.blob,
+                            aspect_ratio=models.AppBskyEmbedImages.AspectRatio(
+                                width=width,
+                                height=height,
+                            ),
+                        )
+                    ]
                 )
+                resp = self.client.send_post(text=trimmed, embed=embed)
             else:
                 resp = self.client.send_post(text=trimmed)
             log.info("posted to bluesky: %s", resp.uri)
