@@ -34,7 +34,7 @@ class BlueskyPoster:
                         models.AppBskyEmbedImages.Image(
                             alt=post.alt_text or "",
                             image=upload.blob,
-                            aspect_ratio=models.AppBskyEmbedImages.AspectRatio(
+                            aspect_ratio=models.AppBskyEmbedDefs.AspectRatio(
                                 width=width,
                                 height=height,
                             ),
