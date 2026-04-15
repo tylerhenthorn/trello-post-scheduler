@@ -1,3 +1,4 @@
+from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 from trello_post_scheduler.config import AppConfig, TrelloConfig, ScheduleConfig, PlatformsConfig, LoggingConfig
@@ -100,3 +101,23 @@ def test_build_scheduler_no_jitter_when_zero(mock_trello_cls):
     jobs = scheduler.get_jobs()
     assert len(jobs) == 1
     assert jobs[0].trigger.jitter is None
+
+
+@patch("trello_post_scheduler.scheduler.TrelloClient")
+def test_jitter_produces_randomized_fire_times(mock_trello_cls):
+    """Compute many next-fire-times and verify they are not all identical."""
+    cfg = AppConfig(
+        trello=TrelloConfig(api_key="k", api_token="t", board_id="b"),
+        schedule=ScheduleConfig(post_times=["12:00"], post_time_randomization=300),
+        platforms=PlatformsConfig(),
+        logging=LoggingConfig(),
+    )
+    scheduler = build_scheduler(cfg, [])
+    trigger = scheduler.get_jobs()[0].trigger
+
+    now = datetime(2025, 1, 1, 0, 0, 0)
+    fire_times = {trigger.get_next_fire_time(None, now) for _ in range(50)}
+
+    # With jitter of 600s the trigger should produce varying fire times.
+    # Without jitter every call returns the exact same datetime.
+    assert len(fire_times) > 1, "expected randomized fire times but all were identical"
