@@ -68,7 +68,7 @@ def test_post_with_image(mock_client_cls, mock_models, mock_image_cls):
     mock_client.send_image.assert_not_called()
 
     # Aspect ratio must carry the actual image dimensions
-    mock_models.AppBskyEmbedImages.AspectRatio.assert_called_once_with(width=800, height=1200)
+    mock_models.AppBskyEmbedDefs.AspectRatio.assert_called_once_with(width=800, height=1200)
 
     # send_post must be called with text and an embed (not send_image)
     mock_client.send_post.assert_called_once()
